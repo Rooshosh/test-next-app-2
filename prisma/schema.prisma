@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model activities {
+  id                   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  strava_id            BigInt       @unique
+  strava_athlete_id    BigInt
+  name                 String
+  activity_type        String
+  start_date           DateTime     @db.Timestamptz(6)
+  distance             Decimal      @db.Decimal
+  moving_time          Int
+  elapsed_time         Int
+  total_elevation_gain Decimal      @db.Decimal
+  start_latlng         Json?
+  end_latlng           Json?
+  map_data             Json?
+  area_captured        Decimal?     @default(0) @db.Decimal
+  activity_json        Json
+  created_at           DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime     @default(now()) @db.Timestamptz(6)
+  strava_users         strava_users @relation(fields: [strava_athlete_id], references: [strava_athlete_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model instruments {
+  id   BigInt @id @default(autoincrement())
+  name String
+}
+
+model notes {
+  id    BigInt  @id @default(autoincrement())
+  title String?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model strava_users {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  strava_athlete_id BigInt       @unique
+  athlete_data      Json
+  access_token      String
+  refresh_token     String
+  token_expires_at  DateTime     @db.Timestamptz(6)
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime     @default(now()) @db.Timestamptz(6)
+  activities        activities[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model test_table {
+  id         BigInt   @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  text       String?
+
+  @@map("test table")
+}
